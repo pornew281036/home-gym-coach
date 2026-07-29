@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="16" fill="#0f172a"/>
+  <ellipse cx="100" cy="95" rx="45" ry="28" fill="#334155" stroke="#38bdf8" stroke-width="3"/>
+  <circle cx="100" cy="50" r="8" fill="#e2e8f0"/>
+  <path d="M100 58 Q100 75 100 85" stroke="#94a3b8" stroke-width="7" stroke-linecap="round"/>
+  <text x="100" y="145" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">CORE</text>
+</svg>

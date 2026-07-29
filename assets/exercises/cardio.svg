@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="16" fill="#0f172a"/>
+  <rect x="30" y="70" width="140" height="20" rx="4" fill="#334155"/>
+  <circle cx="55" cy="80" r="12" fill="#475569"/>
+  <circle cx="145" cy="80" r="12" fill="#475569"/>
+  <path d="M70 50 H130" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6 4"/>
+  <circle cx="100" cy="45" r="6" fill="#e2e8f0"/>
+  <text x="100" y="130" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">CARDIO</text>
+</svg>

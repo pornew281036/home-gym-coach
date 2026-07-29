@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="16" fill="#0f172a"/>
+  <circle cx="55" cy="45" r="7" fill="#e2e8f0"/>
+  <path d="M55 52 L90 70 L90 100" stroke="#94a3b8" stroke-width="7" stroke-linecap="round"/>
+  <path d="M90 70 L150 70" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="130" cy="70" r="9" fill="#38bdf8"/>
+  <circle cx="155" cy="70" r="9" fill="#38bdf8"/>
+  <path d="M90 100 L75 135 M90 100 L110 135" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+  <text x="100" y="152" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">RDL</text>
+</svg>

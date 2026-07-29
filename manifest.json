@@ -1,0 +1,19 @@
+{
+  "name": "Home Gym Coach",
+  "short_name": "GymCoach",
+  "description": "โค้ชเวทบ้าน — หุ่นนายแบบ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
+  "orientation": "portrait",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Home Gym Coach</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon.svg" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">Home Gym <span>Coach</span></div>
+      <div class="muted" style="font-size:0.8rem">หุ่นนายแบบ · บ้าน</div>
+    </header>
+
+    <!-- HOME -->
+    <section id="view-home" class="view active">
+      <div class="card">
+        <div class="meta" id="home-profile">73 kg · 176 cm</div>
+        <div class="note" id="home-fitdays-tip" style="margin:8px 0 0"></div>
+        <div class="meta" id="home-title">Day 1</div>
+        <h2 id="home-subtitle">Push</h2>
+        <p class="meta" id="home-focus"></p>
+        <div class="chip-row">
+          <button type="button" class="chip" id="chip-short">~30 นาที</button>
+          <button type="button" class="chip on" id="chip-full">45+ นาที</button>
+          <button type="button" class="chip" id="chip-long">~60 นาที</button>
+          <span class="chip" id="home-minutes">~45 นาที</span>
+        </div>
+        <div class="week-grid" id="week-grid"></div>
+        <p class="note">วงจร 7 วัน — ใช้ปุ่ม «ข้ามวันนี้» / «ย้อนวันก่อน» ได้ถ้ากดผิด</p>
+      </div>
+
+      <div class="card">
+        <h2 style="font-size:1rem;margin-bottom:4px">ลำดับท่าวันนี้</h2>
+        <ul class="ex-list" id="home-exercises"></ul>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="btn-start">เริ่มโค้ช — เล่นเลย</button>
+      <div style="height:8px"></div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-secondary" id="btn-prev-day">← ย้อนวันก่อน</button>
+        <button type="button" class="btn btn-ghost" id="btn-skip-day">ข้ามวันนี้ →</button>
+      </div>
+      <p class="note" style="text-align:center;margin-top:8px">กดข้ามผิด → กด «ย้อนวันก่อน» ได้ทันที</p>
+    </section>
+
+    <!-- COACH -->
+    <section id="view-coach" class="view">
+      <div class="coach-clock-bar">
+        <div>
+          <div class="clk-label">ทั้ง session</div>
+          <div class="clk-val" id="session-clock">0:00</div>
+        </div>
+        <div class="clk-divider"></div>
+        <div>
+          <div class="clk-label" id="phase-clock-label">ชุดนี้</div>
+          <div class="clk-val accent" id="phase-clock">0:00</div>
+        </div>
+        <div class="clk-progress">
+          <span id="coach-progress-label">1/1</span>
+        </div>
+      </div>
+      <div class="progress-bar"><i id="coach-progress"></i></div>
+
+      <div id="coach-work">
+        <img class="coach-img" id="coach-img" alt="exercise" />
+        <h2 class="coach-title" id="coach-name">Exercise</h2>
+        <p class="coach-th" id="coach-name-th"></p>
+        <p class="meta" id="coach-muscle"></p>
+
+        <div class="timer-box" id="work-timer-box">
+          <div class="label" id="work-timer-label">จับเวลาชุดนี้</div>
+          <div class="time" id="work-time">0:00</div>
+          <div class="btn-row" style="margin-top:10px">
+            <button type="button" class="btn btn-primary sm" id="btn-timer-toggle">เริ่มจับเวลา</button>
+            <button type="button" class="btn btn-secondary sm" id="btn-timer-reset">รีเซ็ต</button>
+          </div>
+          <p class="note" id="work-timer-hint">กดเริ่มก่อนยก — หรือสำหรับ Plank/คาร์ดิโอจะนับถอยหลังให้อัตโนมัติ</p>
+        </div>
+
+        <div class="target-grid">
+          <div class="t"><b id="t-set">1/3</b><span>ชุด</span></div>
+          <div class="t"><b id="t-reps">8-10</b><span>reps</span></div>
+          <div class="t"><b id="t-weight">—</b><span>เป้า</span></div>
+        </div>
+
+        <div class="weight-ctrl" id="weight-ctrl">
+          <button type="button" id="w-minus" aria-label="ลดน้ำหนัก">−</button>
+          <div class="val" id="weight-val">12 kg</div>
+          <button type="button" id="w-plus" aria-label="เพิ่มน้ำหนัก">+</button>
+        </div>
+
+        <div class="cues">
+          <h3>เน้นปฏิบัติ</h3>
+          <ol id="coach-cues"></ol>
+        </div>
+        <p class="note" id="prog-hint"></p>
+        <p class="note" id="coach-note"></p>
+        <p class="meta" id="coach-next" style="margin:12px 0"></p>
+
+        <p class="meta" style="margin-bottom:8px">ทำครบเป้าครั้งนี้แล้วรู้สึกอย่างไร?</p>
+        <div class="btn-row-3">
+          <button type="button" class="btn btn-success sm" id="btn-done-good">ดี</button>
+          <button type="button" class="btn btn-secondary sm" id="btn-done-hard">หนัก</button>
+          <button type="button" class="btn btn-danger sm" id="btn-done-fail">ไม่ครบ</button>
+        </div>
+        <div style="height:10px"></div>
+        <button type="button" class="btn btn-ghost" id="btn-abandon">ออกจาก session</button>
+      </div>
+
+      <div id="coach-rest" class="hidden">
+        <div class="timer-box resting">
+          <div class="label">พักระหว่างชุด — นับถอยหลัง</div>
+          <div class="time" id="rest-time">1:30</div>
+          <div class="btn-row" style="margin-top:10px">
+            <button type="button" class="btn btn-secondary sm" id="btn-rest-minus">−15 วิ</button>
+            <button type="button" class="btn btn-secondary sm" id="btn-rest-plus">+15 วิ</button>
+          </div>
+        </div>
+        <div class="card" id="rest-next"></div>
+        <button type="button" class="btn btn-secondary" id="btn-skip-rest">ข้ามการพัก — พร้อมแล้ว</button>
+      </div>
+
+      <div id="coach-done" class="hidden">
+        <div class="card">
+          <h2>จบ session</h2>
+          <p class="meta">ระบบเพิ่ม <strong>จำนวนครั้งก่อน</strong> (compound 8–15 · isolation 12–20) แล้วค่อยขึ้นน้ำหนักเมื่อถึงขอบบน — เหมาะดัมเบลกระโดด ~4 kg</p>
+          <div id="done-summary"></div>
+          <p class="ok" id="done-next" style="margin-top:12px"></p>
+        </div>
+        <button type="button" class="btn btn-primary" id="btn-back-home">กลับหน้าแรก</button>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="view-history" class="view">
+      <div class="card">
+        <h2>ประวัติ workout</h2>
+        <p class="meta">เก็บในเครื่องนี้เท่านั้น — กดส่งออกได้ที่ตั้งค่า</p>
+        <div id="history-list"></div>
+      </div>
+    </section>
+
+    <!-- FITDAYS -->
+    <section id="view-fitdays" class="view">
+      <div class="card">
+        <h2>Fitdays รายวัน</h2>
+        <p class="meta">
+          อัปโหลดภาพหน้าจอจากแอป Fitdays แล้วกรอกตัวเลขหลัก
+          (เครื่องชั่งอ่าน OCR ในแอปยังไม่แม่น — กรอกยืนยันเองจะปรับแผนได้ชัวร์)
+        </p>
+        <div id="fd-advice" class="cues" style="margin-top:10px">
+          <h3>วิเคราะห์แนวโน้ม</h3>
+          <div id="fd-advice-body" class="meta"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="font-size:1rem">บันทึกวันนี้</h2>
+        <label class="fd-upload">
+          <input type="file" id="fd-file" accept="image/*" capture="environment" hidden />
+          <div class="fd-upload-box" id="fd-upload-box">
+            <span>แตะเพื่อถ่าย / เลือกรูป Fitdays</span>
+          </div>
+          <img id="fd-preview" class="fd-preview hidden" alt="Fitdays preview" />
+        </label>
+        <div class="pf-grid" style="margin-top:12px">
+          <label>วันที่<input type="date" id="fd-date" /></label>
+          <label>น้ำหนัก (kg)<input type="number" id="fd-weight" step="0.1" /></label>
+          <label>ไขมัน %<input type="number" id="fd-bf" step="0.1" placeholder="15.3" /></label>
+          <label>กล้ามเนื้อ (kg)<input type="number" id="fd-muscle" step="0.1" placeholder="35.1" /></label>
+          <label>Visceral<input type="number" id="fd-visceral" step="1" placeholder="3" /></label>
+          <label>คะแนน<input type="number" id="fd-score" step="1" placeholder="82" /></label>
+        </div>
+        <label style="display:block;margin-top:10px;font-size:0.8rem;color:var(--muted)">
+          หมายเหตุ
+          <input type="text" id="fd-note" placeholder="เช่น นอนน้อย / หลังบิน" style="width:100%;margin-top:4px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--text)" />
+        </label>
+        <button type="button" class="btn btn-primary" id="btn-fd-save" style="margin-top:12px">บันทึก + ปรับคำแนะนำ</button>
+        <button type="button" class="btn btn-secondary" id="btn-fd-apply" style="margin-top:8px">ใช้คำแนะนำโหมดเวลากับวันนี้</button>
+      </div>
+
+      <div class="card">
+        <h2 style="font-size:1rem">ประวัติ Fitdays</h2>
+        <div id="fd-list"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settings" class="view">
+      <div class="card">
+        <h2>โปรไฟล์ร่างกาย</h2>
+        <p class="meta" id="pf-summary"></p>
+        <p class="note">BMI ตอนนี้: <strong id="pf-bmi">—</strong> (คำนวณจากน้ำหนัก×ส่วนสูง)</p>
+        <div class="pf-grid">
+          <label>น้ำหนัก (kg)<input type="number" id="pf-weight" step="0.1" min="40" max="200" /></label>
+          <label>ส่วนสูง (cm)<input type="number" id="pf-height" step="1" min="140" max="220" /></label>
+          <label>อายุ<input type="number" id="pf-age" step="1" min="15" max="80" /></label>
+          <label>ไขมัน % (ถ้ามี)<input type="number" id="pf-bf" step="0.1" min="3" max="50" placeholder="เช่น 15.3" /></label>
+        </div>
+        <button type="button" class="btn btn-primary" id="btn-save-profile" style="margin-top:12px">บันทึกโปรไฟล์</button>
+        <p class="note">ค่าเริ่มจากที่คุณแจ้ง + Fitdays (ไขมัน/กล้ามเนื้อ) — เครื่องชั่ง consumer ไม่แม่น 100% ใช้ติดตามแนวโน้ม</p>
+      </div>
+      <div class="card">
+        <h2>ตั้งค่า</h2>
+        <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0">
+          <span>เสียงโค้ช (พูดไทยตอนพัก/ขึ้นท่า)</span>
+          <input type="checkbox" id="set-sound" checked />
+        </label>
+        <p class="note">บน iPhone อาจต้องเปิดเสียงสื่อ / ไม่ปิด Silent บางเครื่อง</p>
+      </div>
+      <div class="card">
+        <h2 style="font-size:1rem">น้ำหนัก + เป้า reps ที่จำไว้</h2>
+        <div id="weight-list"></div>
+      </div>
+      <button type="button" class="btn btn-secondary" id="btn-export">ส่งออกข้อมูล (JSON)</button>
+      <div style="height:8px"></div>
+      <label class="btn btn-secondary" style="cursor:pointer">
+        นำเข้าข้อมูล (JSON)
+        <input type="file" id="btn-import" accept="application/json,.json" hidden />
+      </label>
+      <div class="card" style="margin-top:12px">
+        <h2 style="font-size:1rem">ลิงก์ถาวร (GitHub Pages)</h2>
+        <p class="meta" id="pages-url-hint">
+          ถ้าอัปขึ้น GitHub Pages แล้ว เปิดจากลิงก์
+          <code>https://ชื่อคุณ.github.io/home-gym-coach/</code>
+          — ไม่ต้องเปิด Mac · คู่มือในไฟล์
+          <code>คู่มือ_GitHub_Pages.md</code>
+        </p>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h2 style="font-size:1rem">ทำให้ข้อมูลต่อเนื่อง</h2>
+        <ol class="meta" style="padding-left:1.2rem;line-height:1.55">
+          <li>ใช้มือถือเครื่องเดียว + เพิ่มไปหน้าโฮม (Add to Home screen)</li>
+          <li>เปิดจาก <strong>ลิงก์เดิมทุกครั้ง</strong> — ถ้า IP Mac เปลี่ยน ข้อมูลจะไม่โผล่ (คนละที่เก็บ)</li>
+          <li>ส่งออก JSON ทุกสัปดาห์เก็บไว้ (สำรอง)</li>
+          <li>ย้ายเครื่อง/IP ใหม่ → นำเข้า JSON กลับ</li>
+        </ol>
+        <p class="note">รูป Fitdays เก็บในเครื่องแยก — ไฟล์ JSON มีตัวเลข/แผนยก แต่รูปเก่าอาจไม่ตามไปด้วย</p>
+      </div>
+      <div style="height:8px"></div>
+      <button type="button" class="btn btn-danger" id="btn-reset">ล้างข้อมูลทั้งหมด</button>
+      <div class="card" style="margin-top:12px">
+        <h2 style="font-size:1rem">วิธีเปิดบนมือถือ</h2>
+        <ol class="meta" style="padding-left:1.2rem;line-height:1.5">
+          <li>บน Mac รันสคริปต์ <code>start_server.sh</code></li>
+          <li>มือถือกับ Mac อยู่ Wi‑Fi เดียวกัน</li>
+          <li>เปิดลิงก์ที่สคริปต์แสดงบนมือถือ</li>
+          <li>Chrome: เมนู → Add to Home screen</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <nav class="nav" aria-label="หลัก">
+    <button type="button" class="on" data-view="home"><span class="ico">🏋️</span>วันนี้</button>
+    <button type="button" data-view="coach"><span class="ico">⏱️</span>โค้ช</button>
+    <button type="button" data-view="fitdays"><span class="ico">📊</span>Fitdays</button>
+    <button type="button" data-view="history"><span class="ico">📅</span>ประวัติ</button>
+    <button type="button" data-view="settings"><span class="ico">⚙️</span>ตั้งค่า</button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/fitdays.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

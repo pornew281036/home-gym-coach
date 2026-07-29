@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="16" fill="#0f172a"/>
+  <path d="M40 80 Q100 40 160 80" stroke="#34d399" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <circle cx="40" cy="80" r="6" fill="#34d399"/>
+  <circle cx="160" cy="80" r="6" fill="#34d399"/>
+  <circle cx="100" cy="100" r="8" fill="#e2e8f0"/>
+  <text x="100" y="145" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">BAND</text>
+</svg>

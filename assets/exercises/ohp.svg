@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="16" fill="#0f172a"/>
+  <circle cx="100" cy="35" r="8" fill="#e2e8f0"/>
+  <path d="M100 45 V95" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+  <path d="M100 55 L70 75 M100 55 L130 75" stroke="#94a3b8" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="70" cy="75" r="9" fill="#38bdf8"/>
+  <circle cx="130" cy="75" r="9" fill="#38bdf8"/>
+  <path d="M100 95 L85 130 M100 95 L115 130" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+  <text x="100" y="150" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">OHP</text>
+</svg>

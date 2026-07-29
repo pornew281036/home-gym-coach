@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="16" fill="#0f172a"/>
+  <path d="M90 40 V110 M110 40 V110" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="100" cy="40" rx="22" ry="8" fill="#38bdf8"/>
+  <ellipse cx="100" cy="110" rx="18" ry="6" fill="#334155"/>
+  <text x="100" y="145" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">CALF</text>
+</svg>

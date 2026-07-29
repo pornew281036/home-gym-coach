@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="16" fill="#0f172a"/>
+  <circle cx="100" cy="30" r="7" fill="#e2e8f0"/>
+  <path d="M100 37 V70" stroke="#94a3b8" stroke-width="6" stroke-linecap="round"/>
+  <path d="M100 70 L70 130 M100 70 L130 95" stroke="#94a3b8" stroke-width="6" stroke-linecap="round"/>
+  <path d="M130 95 L140 130" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="85" cy="55" r="7" fill="#38bdf8"/>
+  <circle cx="115" cy="55" r="7" fill="#38bdf8"/>
+  <text x="100" y="152" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">SPLIT</text>
+</svg>

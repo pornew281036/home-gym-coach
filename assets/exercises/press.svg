@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="16" fill="#0f172a"/>
+  <rect x="40" y="100" width="120" height="12" rx="2" fill="#334155"/>
+  <rect x="50" y="70" width="100" height="8" rx="2" fill="#475569" transform="rotate(-12 100 74)"/>
+  <circle cx="70" cy="55" r="10" fill="#38bdf8"/>
+  <circle cx="130" cy="48" r="10" fill="#38bdf8"/>
+  <path d="M85 58 L100 52 L115 50" stroke="#94a3b8" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="100" cy="40" r="8" fill="#e2e8f0"/>
+  <text x="100" y="145" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="11">PRESS</text>
+</svg>
