@@ -72,73 +72,88 @@
       </div>
       <div class="progress-bar"><i id="coach-progress"></i></div>
 
-      <div id="coach-work">
-        <img class="coach-img" id="coach-img" alt="exercise" />
-        <h2 class="coach-title" id="coach-name">Exercise</h2>
-        <p class="coach-th" id="coach-name-th"></p>
-        <p class="meta" id="coach-muscle"></p>
+      <div id="coach-flow">
+        <!-- ZONE 1: ข้อมูล + จับเวลา -->
+        <div class="coach-zone" id="zone-setup">
+          <div class="zone-tag">1 · เตรียมชุดนี้</div>
+          <img class="coach-img" id="coach-img" alt="exercise" />
+          <h2 class="coach-title" id="coach-name">Exercise</h2>
+          <p class="coach-th" id="coach-name-th"></p>
+          <p class="meta" id="coach-muscle"></p>
 
-        <div class="timer-box" id="work-timer-box">
-          <div class="label" id="work-timer-label">จับเวลาชุดนี้</div>
-          <div class="time" id="work-time">0:00</div>
-          <div class="btn-row" style="margin-top:10px">
-            <button type="button" class="btn btn-primary sm" id="btn-timer-toggle">เริ่มจับเวลา</button>
-            <button type="button" class="btn btn-secondary sm" id="btn-timer-reset">รีเซ็ต</button>
+          <div class="target-grid">
+            <div class="t"><b id="t-set">1/3</b><span>ชุด</span></div>
+            <div class="t"><b id="t-reps">8-10</b><span>reps</span></div>
+            <div class="t"><b id="t-weight">—</b><span>เป้า</span></div>
           </div>
-          <p class="note" id="work-timer-hint">กดเริ่มก่อนยก — หรือสำหรับ Plank/คาร์ดิโอจะนับถอยหลังให้อัตโนมัติ</p>
-        </div>
 
-        <div class="target-grid">
-          <div class="t"><b id="t-set">1/3</b><span>ชุด</span></div>
-          <div class="t"><b id="t-reps">8-10</b><span>reps</span></div>
-          <div class="t"><b id="t-weight">—</b><span>เป้า</span></div>
-        </div>
+          <div class="weight-ctrl" id="weight-ctrl">
+            <button type="button" id="w-minus" aria-label="ลดน้ำหนัก">−</button>
+            <div class="val" id="weight-val">12 kg</div>
+            <button type="button" id="w-plus" aria-label="เพิ่มน้ำหนัก">+</button>
+          </div>
 
-        <div class="weight-ctrl" id="weight-ctrl">
-          <button type="button" id="w-minus" aria-label="ลดน้ำหนัก">−</button>
-          <div class="val" id="weight-val">12 kg</div>
-          <button type="button" id="w-plus" aria-label="เพิ่มน้ำหนัก">+</button>
-        </div>
+          <div class="cues">
+            <h3>เน้นปฏิบัติ</h3>
+            <ol id="coach-cues"></ol>
+          </div>
+          <p class="note" id="prog-hint"></p>
+          <p class="note" id="coach-note"></p>
 
-        <div class="cues">
-          <h3>เน้นปฏิบัติ</h3>
-          <ol id="coach-cues"></ol>
-        </div>
-        <p class="note" id="prog-hint"></p>
-        <p class="note" id="coach-note"></p>
-        <p class="meta" id="coach-next" style="margin:12px 0"></p>
-
-        <p class="meta" style="margin-bottom:8px">ทำครบเป้าครั้งนี้แล้วรู้สึกอย่างไร?</p>
-        <div class="btn-row-3">
-          <button type="button" class="btn btn-success sm" id="btn-done-good">ดี</button>
-          <button type="button" class="btn btn-secondary sm" id="btn-done-hard">หนัก</button>
-          <button type="button" class="btn btn-danger sm" id="btn-done-fail">ไม่ครบ</button>
-        </div>
-        <div style="height:10px"></div>
-        <button type="button" class="btn btn-ghost" id="btn-abandon">ออกจาก session</button>
-      </div>
-
-      <div id="coach-rest" class="hidden">
-        <div class="timer-box resting">
-          <div class="label">พักระหว่างชุด — นับถอยหลัง</div>
-          <div class="time" id="rest-time">1:30</div>
-          <div class="btn-row" style="margin-top:10px">
-            <button type="button" class="btn btn-secondary sm" id="btn-rest-minus">−15 วิ</button>
-            <button type="button" class="btn btn-secondary sm" id="btn-rest-plus">+15 วิ</button>
+          <div class="timer-box" id="work-timer-box">
+            <div class="label" id="work-timer-label">จับเวลาชุดนี้</div>
+            <div class="time" id="work-time">0:00</div>
+            <div class="btn-row" style="margin-top:10px">
+              <button type="button" class="btn btn-primary sm" id="btn-timer-toggle">เริ่มจับเวลา</button>
+              <button type="button" class="btn btn-secondary sm" id="btn-timer-reset">รีเซ็ต</button>
+            </div>
+            <p class="note" id="work-timer-hint">กดเริ่ม → เลื่อนไปกดรู้สึกได้ทันที · เสียงพากย์ทุก 10 วิ</p>
           </div>
         </div>
-        <div class="card" id="rest-next"></div>
-        <button type="button" class="btn btn-secondary" id="btn-skip-rest">ข้ามการพัก — พร้อมแล้ว</button>
-      </div>
 
-      <div id="coach-done" class="hidden">
-        <div class="card">
-          <h2>จบ session</h2>
-          <p class="meta">ระบบเพิ่ม <strong>จำนวนครั้งก่อน</strong> (compound 8–15 · isolation 12–20) แล้วค่อยขึ้นน้ำหนักเมื่อถึงขอบบน — เหมาะดัมเบลกระโดด ~4 kg</p>
-          <div id="done-summary"></div>
-          <p class="ok" id="done-next" style="margin-top:12px"></p>
+        <!-- ZONE 2: รู้สึก + ท่าถัดไป -->
+        <div class="coach-zone dimmed" id="zone-rate">
+          <div class="zone-tag">2 · ทำครบแล้วกดเลย</div>
+          <div class="card" id="rate-next-card">
+            <div class="meta">ถัดไปหลังชุดนี้</div>
+            <div id="rate-next-body" class="meta"></div>
+          </div>
+          <p class="meta" id="coach-next" style="margin:8px 0"></p>
+          <p style="margin:8px 0 10px;font-weight:700">รู้สึกอย่างไรกับชุดนี้?</p>
+          <div class="btn-row-3">
+            <button type="button" class="btn btn-success" id="btn-done-good">ดี</button>
+            <button type="button" class="btn btn-secondary" id="btn-done-hard">หนัก</button>
+            <button type="button" class="btn btn-danger" id="btn-done-fail">ไม่ครบ</button>
+          </div>
+          <div style="height:10px"></div>
+          <button type="button" class="btn btn-ghost" id="btn-abandon">ออกจาก session</button>
         </div>
-        <button type="button" class="btn btn-primary" id="btn-back-home">กลับหน้าแรก</button>
+
+        <!-- ZONE 3: พัก -->
+        <div class="coach-zone hidden" id="zone-rest">
+          <div class="zone-tag">3 · พักระหว่างชุด</div>
+          <div class="timer-box resting">
+            <div class="label">พัก — นับถอยหลัง</div>
+            <div class="time" id="rest-time">1:30</div>
+            <div class="btn-row" style="margin-top:10px">
+              <button type="button" class="btn btn-secondary sm" id="btn-rest-minus">−15 วิ</button>
+              <button type="button" class="btn btn-secondary sm" id="btn-rest-plus">+15 วิ</button>
+            </div>
+          </div>
+          <div class="card" id="rest-next"></div>
+          <button type="button" class="btn btn-secondary" id="btn-skip-rest">ข้ามการพัก — พร้อมแล้ว</button>
+        </div>
+
+        <!-- DONE -->
+        <div class="coach-zone hidden" id="zone-done">
+          <div class="card">
+            <h2>จบ session</h2>
+            <p class="meta">ระบบเพิ่มจำนวนครั้งก่อน แล้วค่อยขึ้นน้ำหนักเมื่อถึงขอบบน</p>
+            <div id="done-summary"></div>
+            <p class="ok" id="done-next" style="margin-top:12px"></p>
+          </div>
+          <button type="button" class="btn btn-primary" id="btn-back-home">กลับหน้าแรก</button>
+        </div>
       </div>
     </section>
 
