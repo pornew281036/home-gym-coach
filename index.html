@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/app.css?v=16" />
+  <link rel="stylesheet" href="css/app.css?v=17" />
 </head>
 <body>
   <div class="app-shell">
@@ -197,13 +197,20 @@
 
       <div class="card">
         <h2 style="font-size:1rem">บันทึกวันนี้</h2>
-        <label class="fd-upload">
-          <input type="file" id="fd-file" accept="image/*" capture="environment" hidden />
-          <div class="fd-upload-box" id="fd-upload-box">
-            <span>แตะเพื่อถ่าย / เลือกรูป Fitdays</span>
-          </div>
-          <img id="fd-preview" class="fd-preview hidden" alt="Fitdays preview" />
-        </label>
+        <div class="btn-row" style="margin-bottom:10px">
+          <label class="btn btn-primary sm" style="cursor:pointer;flex:1">
+            เลือกรูปจากคลัง
+            <input type="file" id="fd-file" accept="image/*,.heic,.heif" hidden />
+          </label>
+          <label class="btn btn-secondary sm" style="cursor:pointer;flex:1">
+            ถ่ายใหม่
+            <input type="file" id="fd-file-camera" accept="image/*" capture="environment" hidden />
+          </label>
+        </div>
+        <div class="fd-upload-box" id="fd-upload-box">
+          <span>ยังไม่มีรูป — เลือกภาพหน้าจอ Fitdays จากคลังได้เลย</span>
+        </div>
+        <img id="fd-preview" class="fd-preview hidden" alt="Fitdays preview" />
         <div class="pf-grid" style="margin-top:12px">
           <label>วันที่<input type="date" id="fd-date" /></label>
           <label>น้ำหนัก (kg)<input type="number" id="fd-weight" step="0.1" /></label>
@@ -302,8 +309,8 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="js/data.js?v=16"></script>
-  <script src="js/fitdays.js?v=16"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="js/data.js?v=17"></script>
+  <script src="js/fitdays.js?v=17"></script>
+  <script src="js/app.js?v=17"></script>
 </body>
 </html>

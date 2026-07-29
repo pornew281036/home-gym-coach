@@ -382,6 +382,8 @@ body.coach-mode { padding-bottom: calc(72px + var(--safe-b)); }
   color: var(--muted);
   background: var(--panel2);
 }
+label.btn { display: inline-flex; width: 100%; box-sizing: border-box; }
+label.btn input[type="file"] { display: none; }
 .fd-preview {
   width: 100%;
   max-height: 280px;

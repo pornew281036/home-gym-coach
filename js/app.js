@@ -261,6 +261,7 @@
       $("#fd-preview").classList.remove("hidden");
       $("#fd-upload-box").classList.add("hidden");
       toast("โหลดรูปแล้ว — กรอกตัวเลขแล้วกดบันทึก");
+      e.target.value = "";
     } catch (_) {
       toast("อ่านรูปไม่สำเร็จ");
     }
@@ -1569,6 +1570,7 @@
     });
     $("#btn-save-profile").addEventListener("click", saveProfileFromForm);
     $("#fd-file").addEventListener("change", onFitdaysFileChange);
+    $("#fd-file-camera")?.addEventListener("change", onFitdaysFileChange);
     $("#btn-fd-save").addEventListener("click", () => {
       saveFitdaysEntry().catch(() => toast("บันทึกไม่สำเร็จ"));
     });
@@ -1584,7 +1586,7 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-      .register("./sw.js?v=16")
+      .register("./sw.js?v=17")
       .then((reg) => {
         try {
           reg.update();
