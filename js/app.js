@@ -12,9 +12,18 @@
   let workMode = "up";
   let workSeconds = 0;
   let workRunning = false;
+  let workInitialSeconds = 0;
+  let lastSpokenMark = -1;
 
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => [...document.querySelectorAll(sel)];
+
+  function asset(path) {
+    if (!path) return "";
+    if (/^(https?:|blob:|data:)/i.test(path)) return path;
+    const base = window.HGC_BASE || "./";
+    return base + String(path).replace(/^\.\//, "");
+  }
 
   function loadState() {
     try {
@@ -523,6 +532,62 @@
     }
   }
 
+  function scrollToTop() {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+
+  function showCoachZones(mode) {
+    // setup | active | rest | done
+    const map = {
+      setup: "zone-setup",
+      active: "zone-active",
+      rest: "zone-rest",
+      done: "zone-done",
+    };
+    Object.values(map).forEach((id) => {
+      const z = document.getElementById(id);
+      if (!z) return;
+      z.classList.add("hidden");
+      z.classList.remove("active-zone");
+    });
+    const target = map[mode] || map.setup;
+    const el = document.getElementById(target);
+    if (el) {
+      el.classList.remove("hidden");
+      el.classList.add("active-zone");
+    }
+    scrollToTop();
+  }
+
+  function updateRateNextCard() {
+    const step = currentStep();
+    if (!step || !session) return;
+    const next = session.steps[session.index + 1];
+    const box = $("#rate-next-body");
+    if (!box) return;
+    if (next) {
+      const nx = DATA.exercises[next.exerciseId];
+      box.innerHTML = `
+        <strong>${nx.name}</strong><br>
+        <span class="muted">${nx.nameTh}</span><br>
+        ชุด ${next.setNum}/${next.totalSets} · ${next.reps}` +
+        (next.kg != null ? ` · ${next.kg} kg` : "");
+      if ($("#coach-next")) {
+        $("#coach-next").textContent =
+          next.exerciseId === step.exerciseId
+            ? `ชุดถัดไปท่าเดิม · พัก ${step.restSec || 0} วิ`
+            : `เปลี่ยนท่า · พัก ${step.restSec || 0} วิ`;
+      }
+    } else {
+      box.innerHTML = "<strong>ชุดสุดท้ายของ session</strong>";
+      if ($("#coach-next")) {
+        $("#coach-next").textContent = "หลังกดแล้วอาจจบ session";
+      }
+    }
+  }
+
   function stopWorkTimer() {
     if (workTimer) {
       clearInterval(workTimer);
@@ -530,9 +595,9 @@
     }
     workRunning = false;
     const box = $("#work-timer-box");
-    const btn = $("#btn-timer-toggle");
+    const btn = $("#btn-timer-pause");
     if (box) box.classList.remove("running");
-    if (btn) btn.textContent = "เริ่มจับเวลา";
+    if (btn) btn.textContent = "เริ่มต่อ";
   }
 
   function paintWorkClock() {
@@ -540,30 +605,70 @@
     const workEl = $("#work-time");
     const phaseEl = $("#phase-clock");
     if (workEl) workEl.textContent = t;
-    if (phaseEl && session && session.phase === "work") phaseEl.textContent = t;
+    if (phaseEl && session && (session.phase === "work" || session.phase === "active")) {
+      phaseEl.textContent = t;
+    }
   }
 
-  function startWorkTimer() {
+  function speakTimerMark() {
+    if (!state.sound || !workRunning) return;
+    if (workMode === "up") {
+      if (workSeconds > 0 && workSeconds % 10 === 0 && workSeconds !== lastSpokenMark) {
+        lastSpokenMark = workSeconds;
+        speak(`${workSeconds} วินาที`);
+      }
+    } else {
+      const elapsed = workInitialSeconds - workSeconds;
+      if (elapsed > 0 && elapsed % 10 === 0 && elapsed !== lastSpokenMark) {
+        lastSpokenMark = elapsed;
+        speak(`${elapsed} วินาที`);
+      }
+    }
+  }
+
+  function startWorkTimer(opts) {
+    opts = opts || {};
     if (workRunning) return;
     workRunning = true;
     const box = $("#work-timer-box");
-    const btn = $("#btn-timer-toggle");
+    const pauseBtn = $("#btn-timer-pause");
     if (box) box.classList.add("running");
-    if (btn) btn.textContent = "หยุดชั่วคราว";
+    if (pauseBtn) pauseBtn.textContent = "หยุดชั่วคราว";
+    if (lastSpokenMark < 0) lastSpokenMark = -1;
+
+    const step = currentStep();
+    if (step) {
+      const ex = DATA.exercises[step.exerciseId];
+      if ($("#active-name")) $("#active-name").textContent = ex.name;
+      if ($("#active-name-th")) $("#active-name-th").textContent = ex.nameTh;
+      if ($("#active-target")) {
+        $("#active-target").textContent = `ชุด ${step.setNum}/${step.totalSets} · ${step.reps}` +
+          (step.kg != null ? ` · ${step.kg} kg` : "");
+      }
+    }
+    updateRateNextCard();
+    showCoachZones("active");
+    session.phase = "work";
+    if (opts.announce !== false) {
+      speak("เริ่มจับเวลาแล้ว");
+    }
+
     workTimer = setInterval(() => {
       if (workMode === "up") {
         workSeconds += 1;
         paintWorkClock();
+        speakTimerMark();
       } else {
         workSeconds -= 1;
         paintWorkClock();
+        speakTimerMark();
         if (workSeconds <= 0) {
           workSeconds = 0;
           paintWorkClock();
           stopWorkTimer();
           beep();
-          speak("หมดเวลาชุดนี้");
-          toast("หมดเวลา — กดบันทึกชุดด้านล่างได้");
+          speak("หมดเวลา กดดี หนัก หรือไม่ครบได้เลย");
+          toast("หมดเวลา — กดด้านล่างได้");
         } else if (workSeconds === 5) {
           speak("อีก 5 วินาที");
         }
@@ -571,18 +676,26 @@
     }, 1000);
   }
 
-  function toggleWorkTimer() {
+  function togglePauseTimer() {
     if (workRunning) {
       stopWorkTimer();
-      const btn = $("#btn-timer-toggle");
-      if (btn) btn.textContent = "เริ่มต่อ";
+      speak("หยุดชั่วคราว");
       return;
     }
-    startWorkTimer();
+    startWorkTimer({ announce: false });
+  }
+
+  function beginSetTimer() {
+    // จากหน้าเตรียม
+    lastSpokenMark = -1;
+    if (workMode === "up") workSeconds = 0;
+    paintWorkClock();
+    startWorkTimer({ announce: true });
   }
 
   function resetWorkTimerForStep(step) {
     stopWorkTimer();
+    lastSpokenMark = -1;
     const ex = DATA.exercises[step.exerciseId];
     const timed = parseTimedSeconds(step.reps);
     const box = $("#work-timer-box");
@@ -593,23 +706,30 @@
     if (isCountdown) {
       workMode = "down";
       workSeconds = timed;
+      workInitialSeconds = timed;
       if (box) box.classList.add("countdown");
-      $("#work-timer-label").textContent = "นับถอยหลังชุดนี้";
-      $("#phase-clock-label").textContent = "เหลือ";
-      $("#work-timer-hint").textContent =
-        "เริ่มนับถอยหลังให้อัตโนมัติ — กดหยุดได้";
+      if ($("#work-timer-label")) $("#work-timer-label").textContent = "นับถอยหลังชุดนี้";
+      if ($("#phase-clock-label")) $("#phase-clock-label").textContent = "เหลือ";
+      if ($("#work-timer-hint")) {
+        $("#work-timer-hint").textContent =
+          "ท่าจับเวลา — กดเริ่มแล้วจะนับถอยหลังให้อัตโนมัติ";
+      }
       paintWorkClock();
-      startWorkTimer();
+      // ไม่กระโดดเองทันที — ให้ผู้ใช้กดเริ่ม (ชัดกว่า) ยกเว้น warmup สั้น
+      showCoachZones("setup");
     } else {
       workMode = "up";
       workSeconds = 0;
+      workInitialSeconds = 0;
       if (box) box.classList.remove("countdown");
-      $("#work-timer-label").textContent = "จับเวลาชุดนี้ (นับขึ้น)";
-      $("#phase-clock-label").textContent = "ชุดนี้";
-      $("#work-timer-hint").textContent = `กด “เริ่มจับเวลา” ก่อนยก · หลังชุดพัก ${
-        step.restSec || 60
-      } วิ อัตโนมัติ`;
+      if ($("#work-timer-label")) $("#work-timer-label").textContent = "จับเวลาชุดนี้";
+      if ($("#phase-clock-label")) $("#phase-clock-label").textContent = "ชุดนี้";
+      if ($("#work-timer-hint")) {
+        $("#work-timer-hint").textContent =
+          `กดเริ่มจับเวลา · หลังชุดพัก ${step.restSec || 60} วิ`;
+      }
       paintWorkClock();
+      showCoachZones("setup");
     }
   }
 
@@ -661,7 +781,7 @@
       const planReps = resolveRepPlan(ex, templateReps);
       const li = document.createElement("li");
       li.innerHTML = `
-        <img src="${ex.image}" alt="">
+        <img src="${asset(ex.image)}" alt="">
         <div>
           <div class="name">${ex.name}</div>
           <div class="sub">${ex.nameTh}</div>
@@ -761,12 +881,10 @@
       return;
     }
 
+    session.phase = "work";
     const ex = DATA.exercises[step.exerciseId];
-    $("#coach-work").classList.remove("hidden");
-    $("#coach-rest").classList.add("hidden");
-    $("#coach-done").classList.add("hidden");
 
-    $("#coach-img").src = ex.image;
+    $("#coach-img").src = asset(ex.image);
     $("#coach-img").alt = ex.name;
     $("#coach-name").textContent = ex.name;
     $("#coach-name-th").textContent = ex.nameTh;
@@ -800,17 +918,7 @@
       $("#weight-val").textContent = step.kg != null ? `${step.kg} kg` : "—";
     }
 
-    const next = session.steps[session.index + 1];
-    if (next) {
-      const nx = DATA.exercises[next.exerciseId];
-      $("#coach-next").textContent =
-        next.exerciseId === step.exerciseId
-          ? `ถัดไป: ชุดที่ ${next.setNum} (ท่าเดิม) · พัก ${step.restSec || 0} วิ`
-          : `ถัดไป: ${nx.name} · พัก ${step.restSec || 0} วิ`;
-    } else {
-      $("#coach-next").textContent = "นี่คือช่วงท้ายของ session";
-    }
-
+    updateRateNextCard();
     resetWorkTimerForStep(step);
     updateSessionClock();
   }
@@ -826,9 +934,6 @@
   function renderRest(seconds, nextStep) {
     stopWorkTimer();
     session.phase = "rest";
-    $("#coach-work").classList.add("hidden");
-    $("#coach-rest").classList.remove("hidden");
-    $("#coach-done").classList.add("hidden");
     $("#phase-clock-label").textContent = "พัก";
     restLeft = seconds;
     $("#rest-time").textContent = formatTime(restLeft);
@@ -837,7 +942,7 @@
     if (nextStep) {
       const nx = DATA.exercises[nextStep.exerciseId];
       $("#rest-next").innerHTML = `
-        <img class="coach-img" src="${nx.image}" alt="${nx.name}" style="margin-bottom:10px">
+        <img class="coach-img" src="${asset(nx.image)}" alt="${nx.name}" style="margin-bottom:10px">
         <strong>ท่าถัดไป</strong><br>
         ${nx.name}<br>
         <span class="muted">${nx.nameTh}</span><br>
@@ -850,6 +955,8 @@
     } else {
       $("#rest-next").textContent = "ใกล้จบแล้ว";
     }
+
+    showCoachZones("rest");
 
     stopRest();
     restTimer = setInterval(() => {
@@ -927,7 +1034,10 @@
     const step = currentStep();
     if (step) {
       const ex = DATA.exercises[step.exerciseId];
-      speak(`เริ่ม ${ex.nameTh} ชุดที่ ${step.setNum}`);
+      const timed = parseTimedSeconds(step.reps);
+      if (!(timed != null && (ex.isTimed || ex.isCardio || ex.isWarmup || /วิ|นาที/.test(step.reps)))) {
+        speak(`กลับหน้าเตรียม. ${ex.nameTh} ชุดที่ ${step.setNum}`);
+      }
     }
   }
 
@@ -1073,9 +1183,7 @@
   }
 
   function renderDone() {
-    $("#coach-work").classList.add("hidden");
-    $("#coach-rest").classList.add("hidden");
-    $("#coach-done").classList.remove("hidden");
+    showCoachZones("done");
     const box = $("#done-summary");
     if (!session) {
       box.textContent = "ไม่มี session";
@@ -1328,10 +1436,17 @@
       renderHome();
     });
 
-    $("#btn-timer-toggle").addEventListener("click", toggleWorkTimer);
+    $("#btn-timer-toggle").addEventListener("click", beginSetTimer);
+    $("#btn-timer-pause").addEventListener("click", togglePauseTimer);
     $("#btn-timer-reset").addEventListener("click", () => {
       const step = currentStep();
-      if (step) resetWorkTimerForStep(step);
+      if (!step) return;
+      stopWorkTimer();
+      lastSpokenMark = -1;
+      if (workMode === "up") workSeconds = 0;
+      else workSeconds = workInitialSeconds || parseTimedSeconds(step.reps) || 0;
+      paintWorkClock();
+      showCoachZones("setup");
     });
     $("#btn-rest-minus").addEventListener("click", () => adjustRest(-15));
     $("#btn-rest-plus").addEventListener("click", () => adjustRest(15));

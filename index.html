@@ -7,6 +7,22 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Home Gym Coach</title>
+  <script>
+    // แก้ path รูป/ไฟล์บน GitHub Pages (/home-gym-coach/) และตอนเปิดจาก Mac
+    (function () {
+      var parts = location.pathname.split("/").filter(Boolean);
+      var base = "./";
+      if (parts.length && parts[0] !== "index.html") {
+        if (parts[parts.length - 1].indexOf(".") >= 0) parts.pop();
+        if (parts.length) base = "/" + parts.join("/") + "/";
+      }
+      window.HGC_BASE = base;
+      var b = document.createElement("base");
+      b.href = base;
+      var s = document.currentScript;
+      s.parentNode.insertBefore(b, s.nextSibling);
+    })();
+  </script>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icons/icon.svg" />
   <link rel="apple-touch-icon" href="icons/icon.svg" />
@@ -73,9 +89,9 @@
       <div class="progress-bar"><i id="coach-progress"></i></div>
 
       <div id="coach-flow">
-        <!-- ZONE 1: ข้อมูล + จับเวลา -->
+        <!-- PAGE: เตรียม -->
         <div class="coach-zone" id="zone-setup">
-          <div class="zone-tag">1 · เตรียมชุดนี้</div>
+          <div class="zone-tag">เตรียมชุดนี้</div>
           <img class="coach-img" id="coach-img" alt="exercise" />
           <h2 class="coach-title" id="coach-name">Exercise</h2>
           <p class="coach-th" id="coach-name-th"></p>
@@ -100,38 +116,48 @@
           <p class="note" id="prog-hint"></p>
           <p class="note" id="coach-note"></p>
 
+          <button type="button" class="btn btn-primary" id="btn-timer-toggle">เริ่มจับเวลา</button>
+          <p class="note" id="work-timer-hint" style="margin-top:8px;text-align:center">
+            กดแล้วไปหน้านับเวลา + กดดี/หนัก/ไม่ครบได้ทันที
+          </p>
+          <div style="height:8px"></div>
+          <button type="button" class="btn btn-ghost" id="btn-abandon">ออกจาก session</button>
+        </div>
+
+        <!-- PAGE: กำลังทำ = นาฬิกา + ปุ่มประเมิน -->
+        <div class="coach-zone hidden" id="zone-active">
+          <div class="zone-tag">กำลังทำชุดนี้</div>
+          <h2 class="coach-title" id="active-name">Exercise</h2>
+          <p class="coach-th" id="active-name-th"></p>
+          <p class="meta" id="active-target"></p>
+
           <div class="timer-box" id="work-timer-box">
             <div class="label" id="work-timer-label">จับเวลาชุดนี้</div>
             <div class="time" id="work-time">0:00</div>
             <div class="btn-row" style="margin-top:10px">
-              <button type="button" class="btn btn-primary sm" id="btn-timer-toggle">เริ่มจับเวลา</button>
+              <button type="button" class="btn btn-secondary sm" id="btn-timer-pause">หยุดชั่วคราว</button>
               <button type="button" class="btn btn-secondary sm" id="btn-timer-reset">รีเซ็ต</button>
             </div>
-            <p class="note" id="work-timer-hint">กดเริ่ม → เลื่อนไปกดรู้สึกได้ทันที · เสียงพากย์ทุก 10 วิ</p>
+            <p class="note">เสียงพากย์ทุก 10 วินาที (ถ้าเปิดเสียงโค้ช)</p>
           </div>
-        </div>
 
-        <!-- ZONE 2: รู้สึก + ท่าถัดไป -->
-        <div class="coach-zone dimmed" id="zone-rate">
-          <div class="zone-tag">2 · ทำครบแล้วกดเลย</div>
           <div class="card" id="rate-next-card">
             <div class="meta">ถัดไปหลังชุดนี้</div>
             <div id="rate-next-body" class="meta"></div>
           </div>
           <p class="meta" id="coach-next" style="margin:8px 0"></p>
-          <p style="margin:8px 0 10px;font-weight:700">รู้สึกอย่างไรกับชุดนี้?</p>
+
+          <p style="margin:12px 0 10px;font-weight:700">ทำครบแล้ว — รู้สึกอย่างไร?</p>
           <div class="btn-row-3">
             <button type="button" class="btn btn-success" id="btn-done-good">ดี</button>
             <button type="button" class="btn btn-secondary" id="btn-done-hard">หนัก</button>
             <button type="button" class="btn btn-danger" id="btn-done-fail">ไม่ครบ</button>
           </div>
-          <div style="height:10px"></div>
-          <button type="button" class="btn btn-ghost" id="btn-abandon">ออกจาก session</button>
         </div>
 
-        <!-- ZONE 3: พัก -->
+        <!-- PAGE: พัก -->
         <div class="coach-zone hidden" id="zone-rest">
-          <div class="zone-tag">3 · พักระหว่างชุด</div>
+          <div class="zone-tag">พักระหว่างชุด</div>
           <div class="timer-box resting">
             <div class="label">พัก — นับถอยหลัง</div>
             <div class="time" id="rest-time">1:30</div>

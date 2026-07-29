@@ -155,7 +155,33 @@ button, input, select { font: inherit; color: inherit; }
 .coach-hide-nav .nav { display: none; }
 .coach-hide-nav body, body.coach-mode { padding-bottom: var(--safe-b); }
 
-#view-coach { padding-bottom: 24px; }
+.coach-zone {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+  scroll-margin-top: 130px;
+  transition: opacity 0.2s, border-color 0.2s;
+  min-height: 55vh;
+}
+.coach-zone.dimmed { opacity: 0.45; }
+.coach-zone.active-zone {
+  opacity: 1;
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2);
+}
+.zone-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+#view-coach { padding-bottom: 40px; }
+#coach-flow { min-height: 70vh; }
 
 .progress-bar {
   height: 6px;
