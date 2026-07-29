@@ -154,8 +154,23 @@ button, input, select { font: inherit; color: inherit; }
 .ex-list .sets { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
 
 /* Coach */
-.coach-hide-nav .nav { display: none; }
-.coach-hide-nav body, body.coach-mode { padding-bottom: var(--safe-b); }
+body.coach-mode { padding-bottom: calc(72px + var(--safe-b)); }
+
+.sound-chip {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.sound-chip.on {
+  border-color: rgba(52, 211, 153, 0.55);
+  background: rgba(52, 211, 153, 0.12);
+}
+.sound-chip.off { opacity: 0.55; }
 
 .coach-zone {
   background: var(--panel);
@@ -239,8 +254,7 @@ button, input, select { font: inherit; color: inherit; }
 .target-grid .t span { font-size: 0.75rem; color: var(--muted); }
 
 .coach-clock-bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto;
+  display: flex;
   gap: 8px;
   align-items: center;
   background: var(--panel);
@@ -259,7 +273,7 @@ button, input, select { font: inherit; color: inherit; }
   letter-spacing: 0.04em;
 }
 .coach-clock-bar .clk-val {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -268,8 +282,10 @@ button, input, select { font: inherit; color: inherit; }
   width: 1px;
   height: 32px;
   background: var(--line);
+  flex: 0 0 auto;
 }
 .coach-clock-bar .clk-progress {
+  margin-left: auto;
   font-size: 0.85rem;
   color: var(--accent);
   font-weight: 700;

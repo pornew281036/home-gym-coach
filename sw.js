@@ -1,4 +1,4 @@
-const CACHE = "hgc-v15";
+const CACHE = "hgc-v16";
 const BASE = self.location.href.replace(/sw\.js(\?.*)?$/, "");
 const ASSET_PATHS = [
   "./",
@@ -29,9 +29,7 @@ const ASSETS = ASSET_PATHS.map((p) => new URL(p, BASE).href);
 self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE).then((c) =>
-      Promise.all(
-        ASSETS.map((url) => c.add(url).catch(() => null))
-      )
+      Promise.all(ASSETS.map((url) => c.add(url).catch(() => null)))
     )
   );
   self.skipWaiting();
@@ -46,13 +44,46 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
+function isAppShell(url) {
+  const u = new URL(url);
+  const p = u.pathname;
+  return (
+    p.endsWith("/") ||
+    p.endsWith("/index.html") ||
+    p.endsWith(".css") ||
+    p.endsWith(".js") ||
+    p.endsWith("/sw.js")
+  );
+}
+
 self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+
+  // HTML/CSS/JS: โหลดใหม่ก่อน แล้วค่อย cache — ลดอาการติดเวอร์ชันเก่า
+  if (isAppShell(req.url)) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(req).then((hit) => hit || caches.match(new URL("./index.html", BASE).href)))
+    );
+    return;
+  }
+
   e.respondWith(
-    caches.match(e.request).then((hit) => {
+    caches.match(req).then((hit) => {
       if (hit) return hit;
-      return fetch(e.request).catch(() =>
-        caches.match(new URL("./index.html", BASE).href)
-      );
+      return fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(new URL("./index.html", BASE).href));
     })
   );
 });

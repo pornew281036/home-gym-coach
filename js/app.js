@@ -18,11 +18,59 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => [...document.querySelectorAll(sel)];
 
+  let audioCtx = null;
+
   function asset(path) {
     if (!path) return "";
     if (/^(https?:|blob:|data:)/i.test(path)) return path;
     const base = window.HGC_BASE || "./";
     return base + String(path).replace(/^\.\//, "");
+  }
+
+  function setExerciseImage(imgEl, imagePath, alt) {
+    if (!imgEl) return;
+    const primary = asset(imagePath);
+    imgEl.alt = alt || "";
+    imgEl.onerror = () => {
+      imgEl.onerror = null;
+      const fallback = asset(String(imagePath || "").replace(/\.jpe?g$/i, ".svg"));
+      if (fallback && fallback !== primary) imgEl.src = fallback;
+    };
+    imgEl.src = primary;
+  }
+
+  function unlockAudio() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        if (!audioCtx) audioCtx = new AC();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+      }
+    } catch (_) {}
+    try {
+      if (window.speechSynthesis) {
+        // iOS/Safari: ปลดล็อกเสียงพูดด้วย gesture ของผู้ใช้
+        window.speechSynthesis.cancel();
+        const warm = new SpeechSynthesisUtterance(" ");
+        warm.volume = 0;
+        warm.rate = 2;
+        window.speechSynthesis.speak(warm);
+        window.speechSynthesis.cancel();
+      }
+    } catch (_) {}
+  }
+
+  function pickThaiVoice() {
+    try {
+      const voices = window.speechSynthesis?.getVoices?.() || [];
+      return (
+        voices.find((v) => /^th(-|$)/i.test(v.lang)) ||
+        voices.find((v) => /thai/i.test(v.name)) ||
+        null
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   function loadState() {
@@ -465,10 +513,13 @@
   function speak(text) {
     if (!state.sound || !window.speechSynthesis) return;
     try {
+      unlockAudio();
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "th-TH";
-      u.rate = 1.05;
+      u.rate = 1.0;
+      const voice = pickThaiVoice();
+      if (voice) u.voice = voice;
       window.speechSynthesis.speak(u);
     } catch (_) {}
   }
@@ -476,19 +527,47 @@
   function beep() {
     if (!state.sound) return;
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
+      unlockAudio();
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!audioCtx) audioCtx = new AC();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
       o.connect(g);
-      g.connect(ctx.destination);
+      g.connect(audioCtx.destination);
       o.frequency.value = 880;
-      g.gain.value = 0.05;
+      g.gain.value = 0.06;
       o.start();
       setTimeout(() => {
-        o.stop();
-        ctx.close();
+        try {
+          o.stop();
+        } catch (_) {}
       }, 180);
     } catch (_) {}
+  }
+
+  function syncSoundChip() {
+    const chip = $("#btn-sound-chip");
+    if (!chip) return;
+    chip.textContent = state.sound ? "🔊" : "🔇";
+    chip.classList.toggle("on", !!state.sound);
+    chip.classList.toggle("off", !state.sound);
+    const box = $("#set-sound");
+    if (box) box.checked = !!state.sound;
+  }
+
+  function toggleSound() {
+    unlockAudio();
+    state.sound = !state.sound;
+    saveState();
+    syncSoundChip();
+    if (state.sound) {
+      speak("เปิดเสียงโค้ชแล้ว");
+      beep();
+    } else {
+      toast("ปิดเสียงโค้ชแล้ว");
+    }
   }
 
   function formatTime(sec) {
@@ -539,20 +618,23 @@
   }
 
   function showCoachZones(mode) {
-    // setup | active | rest | done
+    // work | rest | done  (setup/active เดิม = work หน้าเดียว)
     const map = {
-      setup: "zone-setup",
-      active: "zone-active",
+      setup: "zone-work",
+      active: "zone-work",
+      work: "zone-work",
       rest: "zone-rest",
       done: "zone-done",
     };
-    Object.values(map).forEach((id) => {
-      const z = document.getElementById(id);
-      if (!z) return;
-      z.classList.add("hidden");
-      z.classList.remove("active-zone");
-    });
-    const target = map[mode] || map.setup;
+    Object.values({ work: "zone-work", rest: "zone-rest", done: "zone-done" }).forEach(
+      (id) => {
+        const z = document.getElementById(id);
+        if (!z) return;
+        z.classList.add("hidden");
+        z.classList.remove("active-zone");
+      }
+    );
+    const target = map[mode] || map.work;
     const el = document.getElementById(target);
     if (el) {
       el.classList.remove("hidden");
@@ -596,8 +678,10 @@
     workRunning = false;
     const box = $("#work-timer-box");
     const btn = $("#btn-timer-pause");
+    const startBtn = $("#btn-timer-toggle");
     if (box) box.classList.remove("running");
     if (btn) btn.textContent = "เริ่มต่อ";
+    if (startBtn) startBtn.textContent = "เริ่มจับเวลา";
   }
 
   function paintWorkClock() {
@@ -632,25 +716,25 @@
     workRunning = true;
     const box = $("#work-timer-box");
     const pauseBtn = $("#btn-timer-pause");
+    const startBtn = $("#btn-timer-toggle");
     if (box) box.classList.add("running");
     if (pauseBtn) pauseBtn.textContent = "หยุดชั่วคราว";
+    if (startBtn) startBtn.textContent = "กำลังจับเวลา";
     if (lastSpokenMark < 0) lastSpokenMark = -1;
 
     const step = currentStep();
     if (step) {
       const ex = DATA.exercises[step.exerciseId];
-      if ($("#active-name")) $("#active-name").textContent = ex.name;
-      if ($("#active-name-th")) $("#active-name-th").textContent = ex.nameTh;
-      if ($("#active-target")) {
-        $("#active-target").textContent = `ชุด ${step.setNum}/${step.totalSets} · ${step.reps}` +
-          (step.kg != null ? ` · ${step.kg} kg` : "");
-      }
+      const tag = $("#work-zone-tag");
+      if (tag) tag.textContent = "กำลังทำชุดนี้";
+      if (ex) setExerciseImage($("#coach-img"), ex.image, ex.name);
     }
     updateRateNextCard();
-    showCoachZones("active");
+    showCoachZones("work");
     session.phase = "work";
     if (opts.announce !== false) {
       speak("เริ่มจับเวลาแล้ว");
+      beep();
     }
 
     workTimer = setInterval(() => {
@@ -686,11 +770,13 @@
   }
 
   function beginSetTimer() {
-    // จากหน้าเตรียม
+    unlockAudio();
     lastSpokenMark = -1;
     if (workMode === "up") workSeconds = 0;
     paintWorkClock();
     startWorkTimer({ announce: true });
+    const box = $("#work-timer-box");
+    if (box) box.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function resetWorkTimerForStep(step) {
@@ -716,7 +802,7 @@
       }
       paintWorkClock();
       // ไม่กระโดดเองทันที — ให้ผู้ใช้กดเริ่ม (ชัดกว่า) ยกเว้น warmup สั้น
-      showCoachZones("setup");
+      showCoachZones("work");
     } else {
       workMode = "up";
       workSeconds = 0;
@@ -726,10 +812,10 @@
       if ($("#phase-clock-label")) $("#phase-clock-label").textContent = "ชุดนี้";
       if ($("#work-timer-hint")) {
         $("#work-timer-hint").textContent =
-          `กดเริ่มจับเวลา · หลังชุดพัก ${step.restSec || 60} วิ`;
+          `กดเริ่มจับเวลา · หลังชุดพัก ${step.restSec || 60} วิ · เสียงทุก 10 วิถ้าเปิด`;
       }
       paintWorkClock();
-      showCoachZones("setup");
+      showCoachZones("work");
     }
   }
 
@@ -741,8 +827,7 @@
       b.classList.toggle("on", b.dataset.view === id)
     );
     document.body.classList.toggle("coach-mode", id === "coach");
-    if (id !== "coach") $(".nav").classList.remove("hidden");
-    else $(".nav").classList.add("hidden");
+    // เมนูล่างคงไว้เสมอ — สะดวกเปิดเสียง/ออกหน้า
   }
 
   /* ---------- Home ---------- */
@@ -780,13 +865,16 @@
       const templateReps = b.reps ?? ex.defaultReps;
       const planReps = resolveRepPlan(ex, templateReps);
       const li = document.createElement("li");
-      li.innerHTML = `
-        <img src="${asset(ex.image)}" alt="">
-        <div>
-          <div class="name">${ex.name}</div>
-          <div class="sub">${ex.nameTh}</div>
-        </div>
-        <div class="sets">${sets}×${planReps.display}</div>`;
+      const img = document.createElement("img");
+      setExerciseImage(img, ex.image, ex.name);
+      const mid = document.createElement("div");
+      mid.innerHTML = `<div class="name">${ex.name}</div><div class="sub">${ex.nameTh}</div>`;
+      const setsEl = document.createElement("div");
+      setsEl.className = "sets";
+      setsEl.textContent = `${sets}×${planReps.display}`;
+      li.appendChild(img);
+      li.appendChild(mid);
+      li.appendChild(setsEl);
       list.appendChild(li);
     });
 
@@ -853,6 +941,7 @@
   }
 
   function startSession() {
+    unlockAudio();
     stopRest();
     stopWorkTimer();
     session = buildSession();
@@ -861,6 +950,7 @@
     renderCoach();
     const ex = DATA.exercises[session.steps[0].exerciseId];
     speak(`เริ่ม ${session.dayTitle}. ท่าแรก ${ex.nameTh}`);
+    beep();
   }
 
   function currentStep() {
@@ -884,8 +974,9 @@
     session.phase = "work";
     const ex = DATA.exercises[step.exerciseId];
 
-    $("#coach-img").src = asset(ex.image);
-    $("#coach-img").alt = ex.name;
+    const tag = $("#work-zone-tag");
+    if (tag) tag.textContent = "ชุดนี้";
+    setExerciseImage($("#coach-img"), ex.image, ex.name);
     $("#coach-name").textContent = ex.name;
     $("#coach-name-th").textContent = ex.nameTh;
     $("#coach-muscle").textContent = `${ex.muscle} · ${ex.equipment}`;
@@ -942,7 +1033,7 @@
     if (nextStep) {
       const nx = DATA.exercises[nextStep.exerciseId];
       $("#rest-next").innerHTML = `
-        <img class="coach-img" src="${asset(nx.image)}" alt="${nx.name}" style="margin-bottom:10px">
+        <img class="coach-img" id="rest-next-img" alt="${nx.name}" style="margin-bottom:10px">
         <strong>ท่าถัดไป</strong><br>
         ${nx.name}<br>
         <span class="muted">${nx.nameTh}</span><br>
@@ -951,6 +1042,7 @@
           .slice(0, 2)
           .map((c) => `<li>${c}</li>`)
           .join("")}</ol></div>`;
+      setExerciseImage($("#rest-next-img"), nx.image, nx.name);
       speak(`พัก ${seconds} วินาที. ถัดไป ${nx.nameTh}`);
     } else {
       $("#rest-next").textContent = "ใกล้จบแล้ว";
@@ -1263,7 +1355,7 @@
   function renderSettings() {
     ensureProfile();
     ensureTargets();
-    $("#set-sound").checked = state.sound;
+    syncSoundChip();
     const p = state.profile;
     $("#pf-weight").value = p.weightKg;
     $("#pf-height").value = p.heightCm;
@@ -1419,7 +1511,10 @@
       toast("โหมด ~60 นาที");
     });
 
-    $("#btn-start").addEventListener("click", startSession);
+    $("#btn-start").addEventListener("click", () => {
+      unlockAudio();
+      startSession();
+    });
     $("#btn-skip-day").addEventListener("click", skipDay);
     $("#btn-prev-day").addEventListener("click", prevDay);
 
@@ -1446,7 +1541,7 @@
       if (workMode === "up") workSeconds = 0;
       else workSeconds = workInitialSeconds || parseTimedSeconds(step.reps) || 0;
       paintWorkClock();
-      showCoachZones("setup");
+      showCoachZones("work");
     });
     $("#btn-rest-minus").addEventListener("click", () => adjustRest(-15));
     $("#btn-rest-plus").addEventListener("click", () => adjustRest(15));
@@ -1464,9 +1559,12 @@
       paintWeightOnly();
     });
 
+    $("#btn-sound-chip")?.addEventListener("click", toggleSound);
     $("#set-sound").addEventListener("change", (e) => {
+      unlockAudio();
       state.sound = e.target.checked;
       saveState();
+      syncSoundChip();
       if (state.sound) speak("เปิดเสียงโค้ชแล้ว");
     });
     $("#btn-save-profile").addEventListener("click", saveProfileFromForm);
@@ -1485,13 +1583,31 @@
   }
 
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
+    navigator.serviceWorker
+      .register("./sw.js?v=16")
+      .then((reg) => {
+        try {
+          reg.update();
+        } catch (_) {}
+      })
+      .catch(() => {});
+  }
+
+  if (window.speechSynthesis) {
+    try {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    } catch (_) {}
   }
 
   ensureProfile();
   ensureTargets();
   ensureFitdays();
+  if (typeof state.sound !== "boolean") state.sound = true;
   bind();
+  syncSoundChip();
   renderHome();
   renderHistory();
   showView("home");

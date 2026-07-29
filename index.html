@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/app.css?v=16" />
 </head>
 <body>
   <div class="app-shell">
@@ -85,13 +85,14 @@
         <div class="clk-progress">
           <span id="coach-progress-label">1/1</span>
         </div>
+        <button type="button" class="sound-chip on" id="btn-sound-chip" title="เปิด/ปิดเสียง">🔊</button>
       </div>
       <div class="progress-bar"><i id="coach-progress"></i></div>
 
       <div id="coach-flow">
-        <!-- PAGE: เตรียม -->
-        <div class="coach-zone" id="zone-setup">
-          <div class="zone-tag">เตรียมชุดนี้</div>
+        <!-- หน้าเดียว: รูป + เป้า + จับเวลา + ประเมิน (สะดวกตอนยก) -->
+        <div class="coach-zone active-zone" id="zone-work">
+          <div class="zone-tag" id="work-zone-tag">ชุดนี้</div>
           <img class="coach-img" id="coach-img" alt="exercise" />
           <h2 class="coach-title" id="coach-name">Exercise</h2>
           <p class="coach-th" id="coach-name-th"></p>
@@ -116,29 +117,15 @@
           <p class="note" id="prog-hint"></p>
           <p class="note" id="coach-note"></p>
 
-          <button type="button" class="btn btn-primary" id="btn-timer-toggle">เริ่มจับเวลา</button>
-          <p class="note" id="work-timer-hint" style="margin-top:8px;text-align:center">
-            กดแล้วไปหน้านับเวลา + กดดี/หนัก/ไม่ครบได้ทันที
-          </p>
-          <div style="height:8px"></div>
-          <button type="button" class="btn btn-ghost" id="btn-abandon">ออกจาก session</button>
-        </div>
-
-        <!-- PAGE: กำลังทำ = นาฬิกา + ปุ่มประเมิน -->
-        <div class="coach-zone hidden" id="zone-active">
-          <div class="zone-tag">กำลังทำชุดนี้</div>
-          <h2 class="coach-title" id="active-name">Exercise</h2>
-          <p class="coach-th" id="active-name-th"></p>
-          <p class="meta" id="active-target"></p>
-
           <div class="timer-box" id="work-timer-box">
             <div class="label" id="work-timer-label">จับเวลาชุดนี้</div>
             <div class="time" id="work-time">0:00</div>
             <div class="btn-row" style="margin-top:10px">
+              <button type="button" class="btn btn-primary sm" id="btn-timer-toggle">เริ่มจับเวลา</button>
               <button type="button" class="btn btn-secondary sm" id="btn-timer-pause">หยุดชั่วคราว</button>
               <button type="button" class="btn btn-secondary sm" id="btn-timer-reset">รีเซ็ต</button>
             </div>
-            <p class="note">เสียงพากย์ทุก 10 วินาที (ถ้าเปิดเสียงโค้ช)</p>
+            <p class="note" id="work-timer-hint">กดเริ่มได้ · เสียงพากย์ทุก 10 วิ (ถ้าเปิดเสียง)</p>
           </div>
 
           <div class="card" id="rate-next-card">
@@ -153,9 +140,11 @@
             <button type="button" class="btn btn-secondary" id="btn-done-hard">หนัก</button>
             <button type="button" class="btn btn-danger" id="btn-done-fail">ไม่ครบ</button>
           </div>
+          <div style="height:8px"></div>
+          <button type="button" class="btn btn-ghost" id="btn-abandon">ออกจาก session</button>
         </div>
 
-        <!-- PAGE: พัก -->
+        <!-- พัก -->
         <div class="coach-zone hidden" id="zone-rest">
           <div class="zone-tag">พักระหว่างชุด</div>
           <div class="timer-box resting">
@@ -313,8 +302,8 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="js/data.js"></script>
-  <script src="js/fitdays.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/data.js?v=16"></script>
+  <script src="js/fitdays.js?v=16"></script>
+  <script src="js/app.js?v=16"></script>
 </body>
 </html>
