@@ -1,4 +1,4 @@
-const CACHE = "hgc-v11";
+const CACHE = "hgc-v12";
 const BASE = self.location.href.replace(/sw\.js(\?.*)?$/, "");
 const ASSET_PATHS = [
   "./",
